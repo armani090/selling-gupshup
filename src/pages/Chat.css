@@ -1,0 +1,881 @@
+.chat-page-layout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(255, 255, 255, 0.75) 0,
+      rgba(255, 255, 255, 0.35) 90px,
+      transparent 180px
+    ),
+    radial-gradient(
+      circle at 80% 15%,
+      rgba(210, 245, 220, 0.55) 0,
+      rgba(255, 255, 255, 0.25) 100px,
+      transparent 200px
+    ),
+    radial-gradient(
+      circle at 65% 75%,
+      rgba(255, 255, 255, 0.55) 0,
+      transparent 180px
+    ),
+    linear-gradient(
+      135deg,
+      #eaf8ef 0%,
+      #f4fbff 50%,
+      #e8f7ff 100%
+    );
+
+  min-height: 100vh;
+}
+
+
+/* ==========================================
+   CHAT
+========================================== */
+
+.chat-container {
+  width: 90%;
+  max-width: 550px;
+  margin: 10px 0;
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.chat-header {
+  padding: 5px;
+}
+
+.chat-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-user h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.chat-user span {
+  font-size: 11px;
+  color: #555;
+}
+
+.chat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.chat-avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ==========================================
+   USER SELECTION
+========================================== */
+
+.user-selection {
+  margin: 8px 0;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.user-selection label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #444;
+}
+
+.user-selection select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 13px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+
+/* ==========================================
+   CHAT BOX
+========================================== */
+
+.chat-box {
+  height: 430px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  background: #f8f8f8;
+  box-sizing: border-box;
+}
+
+.message-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.my-message-row {
+  justify-content: flex-end;
+}
+
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eee;
+}
+
+.message-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.message-details {
+  max-width: 75%;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-details strong {
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.message-bubble {
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  word-wrap: break-word;
+  font-size: 14px;
+}
+
+.my-message-row .message-bubble {
+  background: #007bff;
+  color: white;
+  border: none;
+}
+
+.message-details small {
+  font-size: 9px;
+  color: #555;
+  margin-top: 2px;
+}
+
+.chat-shared-image {
+  max-width: 180px;
+  max-height: 180px;
+  border-radius: 8px;
+  display: block;
+}
+
+.message-bubble audio {
+  max-width: 200px;
+}
+
+.public-message-clickable {
+  cursor: pointer;
+}
+
+.report-hint {
+  color: #555;
+  font-size: 8px !important;
+}
+
+
+/* ==========================================
+   EMOJI
+========================================== */
+
+.emoji-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 7px;
+  margin-top: 5px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.emoji-box button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 2px;
+}
+
+
+/* ==========================================
+   INPUT
+========================================== */
+
+.input-area {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.input-area input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 18px;
+  outline: none;
+  font-size: 13px;
+}
+
+.input-area button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 3px;
+}
+
+.input-area button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+
+/* ==========================================
+   COMMUNITY RULES
+========================================== */
+
+.community-side-panel {
+  width: 215px;
+  flex: 0 0 215px;
+  margin-top: 10px;
+  min-height: 590px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.community-side-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 8px;
+}
+
+.community-rule-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 7px 4px;
+  border-bottom: 1px solid #eee;
+}
+
+.rule-number {
+  width: 21px;
+  height: 21px;
+  min-width: 21px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f1f1;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.community-rule-box strong {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.community-rule-box p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 14px;
+  color: #444;
+}
+
+
+/* ==========================================
+   SELL PRODUCTS
+========================================== */
+
+.sell-here-box {
+  margin-top: 12px;
+  padding: 12px 8px;
+  text-align: center;
+  border-radius: 8px;
+  background: #f8f8f8;
+  border: 1px solid #e2e2e2;
+}
+
+.sell-here-icon {
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+
+.sell-here-title {
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.sell-here-box p {
+  font-size: 10px;
+  line-height: 15px;
+  color: #444;
+  margin: 0;
+}
+
+.sell-here-line {
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #444;
+}
+
+
+/* ==========================================
+   PROMOTIONS
+========================================== */
+
+.promotion-panel {
+  width: 280px;
+  flex: 0 0 280px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+  margin-top: 10px;
+}
+
+.promotion-header {
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.promotion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.promotion-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 7px;
+  padding: 7px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.promotion-image-wrapper {
+  width: 100%;
+  height: 105px;
+  overflow: hidden;
+  border-radius: 6px;
+  margin-bottom: 5px;
+}
+
+.promotion-image-real {
+  width: 100%;
+  height: 105px;
+  object-fit: cover;
+  display: block;
+}
+
+.promotion-image {
+  width: 100%;
+  height: 105px;
+  border-radius: 6px;
+  background: #f2f2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.promotion-card h3 {
+  font-size: 14px;
+  margin: 3px 0;
+}
+
+.promotion-title {
+  font-size: 12px;
+  font-weight: bold;
+  margin: 3px 0;
+  color: #444;
+}
+
+.promotion-text {
+  font-size: 11px;
+  line-height: 15px;
+  margin: 3px 0 6px;
+  color: #444;
+}
+
+
+/* ==========================================
+   PROMOTION BUTTON
+========================================== */
+
+.promotion-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 5px;
+  padding: 7px 13px;
+  border: none;
+  border-radius: 6px;
+  background: #007bff;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.25);
+  transition: all 0.2s ease;
+}
+
+.promotion-button:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 7px rgba(0, 86, 179, 0.3);
+}
+
+.promotion-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 86, 179, 0.25);
+}
+
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 1050px) {
+  .chat-page-layout {
+    flex-wrap: wrap;
+  }
+
+  .community-side-panel {
+    order: 3;
+    width: 90%;
+    max-width: 550px;
+    flex: none;
+    min-height: auto;
+  }
+
+  .promotion-panel {
+    order: 2;
+  }
+
+  .chat-container {
+    order: 1;
+  }
+}
+
+@media (max-width: 800px) {
+  .chat-page-layout {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .chat-container,
+  .community-side-panel,
+  .promotion-panel {
+    width: 95%;
+    max-width: 550px;
+    flex: none;
+  }
+
+  .community-side-panel {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .chat-container,
+  .community-side-panel,
+  .promotion-panel {
+    width: 98%;
+  }
+
+  .chat-box {
+    height: 430px;
+  }
+}/* =========================================================
+   HOME PAGE - DESKTOP PROMOTIONS + RESPONSIVE LAYOUT
+   ========================================================= */
+
+.home-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px 24px 50px;
+  box-sizing: border-box;
+}
+
+.home-hero {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.home-hero h1 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.home-hero h2 {
+  margin: 8px 0;
+}
+
+.home-hero p {
+  margin: 8px auto 18px;
+  max-width: 700px;
+}
+
+.home-hero-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.home-main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 24px;
+  align-items: start;
+}
+
+.home-content-column {
+  min-width: 0;
+}
+
+.home-content-column .post-create-box {
+  max-width: 700px;
+  margin: 0 auto 20px;
+}
+
+.home-content-column .posts-feed {
+  max-width: 700px;
+  margin: 20px auto 30px;
+}
+
+/* =========================
+   HOME PROMOTIONS SIDEBAR
+   ========================= */
+
+.home-promotion-sidebar {
+  width: 100%;
+  position: sticky;
+  top: 18px;
+  align-self: start;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  max-height: calc(100vh - 36px);
+  box-sizing: border-box;
+}
+
+.home-promotion-header {
+  background: #f5f5f5;
+  padding: 14px 16px;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.home-promotion-list {
+  padding: 10px;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+}
+
+.home-promotion-card {
+  background: #ffffff;
+  border: 1px solid #e3e3e3;
+  border-radius: 11px;
+  padding: 10px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+.home-promotion-card:last-child {
+  margin-bottom: 0;
+}
+
+.home-promotion-image-wrapper {
+  width: 100%;
+  height: 125px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f1f1f1;
+  margin-bottom: 9px;
+}
+
+.home-promotion-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.home-promotion-placeholder {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f3f3;
+  border-radius: 8px;
+  font-size: 32px;
+  margin-bottom: 9px;
+}
+
+.home-promotion-card h3 {
+  margin: 5px 0;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.home-promotion-subtitle {
+  margin: 4px 0;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.home-promotion-text {
+  margin: 6px 0 9px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.home-promotion-button {
+  width: 100%;
+  border: none;
+  border-radius: 7px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.home-promotion-button:hover {
+  opacity: 0.9;
+}
+
+.home-no-promotion {
+  text-align: center;
+  border: none;
+}
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 900px) {
+
+  .home-container {
+    padding: 20px 12px 35px;
+  }
+
+  .home-main-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .home-promotion-sidebar {
+    order: -1;
+    position: sticky;
+    top: 6px;
+    z-index: 20;
+    width: 100%;
+    max-height: 185px;
+    border-radius: 10px;
+  }
+
+  .home-promotion-header {
+    padding: 9px 12px;
+    font-size: 15px;
+  }
+
+  .home-promotion-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px;
+    max-height: 135px;
+  }
+
+  .home-promotion-card {
+    flex: 0 0 230px;
+    margin-bottom: 0;
+    padding: 8px;
+  }
+
+  .home-promotion-image-wrapper {
+    height: 55px;
+    margin-bottom: 5px;
+  }
+
+  .home-promotion-placeholder {
+    height: 45px;
+    margin-bottom: 5px;
+    font-size: 22px;
+  }
+
+  .home-promotion-card h3 {
+    font-size: 13px;
+    margin: 2px 0;
+  }
+
+  .home-promotion-subtitle,
+  .home-promotion-text {
+    font-size: 11px;
+    margin: 2px 0;
+    line-height: 1.25;
+  }
+
+  .home-promotion-button {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .home-no-promotion {
+    padding: 7px;
+  }
+
+  .home-no-promotion .home-promotion-placeholder {
+    display: none;
+  }
+
+  .home-content-column .post-create-box,
+  .home-content-column .posts-feed {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .home-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .home-hero {
+    margin-bottom: 18px;
+  }
+
+  .home-hero h1 {
+    font-size: 27px;
+  }
+
+  .home-hero h2 {
+    font-size: 18px;
+  }
+
+  .home-hero p {
+    font-size: 14px;
+  }
+
+  .home-hero-buttons button {
+    width: 100%;
+  }
+
+  .home-hero-buttons {
+    width: 100%;
+  }
+
+  .home-promotion-sidebar {
+    max-height: 175px;
+  }
+
+  .home-promotion-list {
+    max-height: 125px;
+  }
+
+  .home-promotion-card {
+    flex-basis: 210px;
+  }
+
+}
+/* ONLINE USERS - VERTICAL LIST FIX */
+.online-users-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 6px;
+}
+
+.online-user-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 42px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.online-user-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
