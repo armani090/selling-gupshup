@@ -4306,19 +4306,12 @@ async function startServer() {
 
   await connectMongoDB();
 
-  httpServer.listen(
-    5000,
-    () => {
-
-      console.log(
-        "Selling GupShup Server running on port 5000"
-      );
-
-    }
-  );
+  httpServer.listen(process.env.PORT || 5000, () => { console.log(`Selling GupShup Server running on port ${process.env.PORT || 5000}`); });
 }
 
 startServer();
+
+
 
 
 
