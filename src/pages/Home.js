@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { socket } from "../socket";
 
@@ -447,7 +447,7 @@ function Home() {
         );
 
         const response = await fetch(
-          "http://localhost:5000/upload-post-media",
+          (window.location.hostname === "localhost" ? "http://localhost:5000/upload-post-media" : "/upload-post-media"),
           {
             method: "POST",
             body: formData,
