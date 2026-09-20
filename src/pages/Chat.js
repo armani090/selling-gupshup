@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
 import "./Chat.css";
 
@@ -54,7 +54,6 @@ function Chat() {
   const [message, setMessage] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [typingUser, setTypingUser] = useState("");
 
   const [unreadPrivateMessages, setUnreadPrivateMessages] = useState({});
 
@@ -67,7 +66,6 @@ function Chat() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const chatBoxRef = useRef(null);
-  const typingTimeoutRef = useRef(null);
   const selectedUserUnreadRef = useRef(selectedUser);
   const chatModeUnreadRef = useRef(chatMode);
 
@@ -1617,7 +1615,7 @@ function Chat() {
                     "0 1px 4px rgba(0,0,0,0.12)"
                 }}
               >
-                <span>ÃƒÂ°Ã…Â¸Ã¢â‚¬â„¢Ã‚Â¬</span>
+                <span>{"\u{1F4AC}"}</span>
 
                 <span
                   style={{
@@ -2961,6 +2959,7 @@ function Chat() {
 }
 
 export default Chat;
+
 
 
 

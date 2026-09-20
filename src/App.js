@@ -15,46 +15,14 @@ import MyPromotions from "./pages/MyPromotions";
 import { socket } from "./socket";
 
 function App() {
-  const [username, setUsername] = useState(
-    () => localStorage.getItem("username") || ""
-  );
-
-  const [notification, setNotification] = useState("");
-
   const [unreadCounts, setUnreadCounts] = useState(() => {
-    const saved = localStorage.getItem("unreadCounts");
-
     try {
-      return saved ? JSON.parse(saved) : {};
+      return JSON.parse(localStorage.getItem("unreadCounts")) || {};
     } catch {
       return {};
     }
   });
-
-  useEffect(() => {
-    const checkUser = () => {
-      const savedUsername =
-        localStorage.getItem("username") || "";
-
-      const loggedIn =
-        localStorage.getItem("login") === "true";
-
-      if (loggedIn && savedUsername) {
-        setUsername(savedUsername);
-      } else {
-        setUsername("");
-      }
-    };
-
-    checkUser();
-
-    window.addEventListener("storage", checkUser);
-
-    return () => {
-      window.removeEventListener("storage", checkUser);
-    };
-  }, []);
-
+  const [notification, setNotification] = useState("");
   useEffect(() => {
     localStorage.setItem(
       "unreadCounts",
@@ -165,8 +133,9 @@ function App() {
         };
       });
 
+      // Unicode-safe notification icon
       setNotification(
-        "🔔 New message from " +
+        "\uD83D\uDD14 New message from " +
           newMessage.username
       );
 
@@ -327,3 +296,6 @@ function App() {
 }
 
 export default App;
+
+
+
