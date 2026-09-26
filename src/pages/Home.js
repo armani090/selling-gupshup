@@ -447,7 +447,9 @@ function Home() {
         );
 
         const response = await fetch(
-          (window.location.hostname === "localhost" ? "http://localhost:5000/upload-post-media" : "/upload-post-media"),
+          (window.location.hostname === "localhost"
+            ? "http://localhost:5000/upload-post-media"
+            : "/upload-post-media"),
           {
             method: "POST",
             body: formData,
@@ -1126,9 +1128,6 @@ function Home() {
               <h3>
                 {"\u{1F465}"} Community
               </h3>
-              <p>
-                Meet new people and make connections.
-              </p>
             </div>
 
             <div className="card">
@@ -1232,3 +1231,4 @@ function Home() {
 }
 
 export default Home;
+
