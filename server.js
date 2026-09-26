@@ -1,4 +1,4 @@
-﻿require("dotenv").config();
+require("dotenv").config();
 
 const { createServer } = require("http");
 const { Server } = require("socket.io");
@@ -4297,6 +4297,20 @@ if (
   });
 
 });
+
+// ==========================================
+// SERVE REACT BUILD IN PRODUCTION
+// ==========================================
+
+const buildDir = path.join(__dirname, "build");
+
+if (fs.existsSync(buildDir)) {
+  app.use(express.static(buildDir));
+
+  app.get('/{*splat}', (req, res) => {
+    res.sendFile(path.join(buildDir, "index.html"));
+  });
+}
 
 // ==========================================
 // START SERVER
