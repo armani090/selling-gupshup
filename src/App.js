@@ -22,7 +22,9 @@ function App() {
       return {};
     }
   });
+
   const [notification, setNotification] = useState("");
+
   useEffect(() => {
     localStorage.setItem(
       "unreadCounts",
@@ -77,50 +79,28 @@ function App() {
       if (
         !newMessage ||
         !newMessage.username ||
-        newMessage.username === currentUsername
+        String(newMessage.username).toLowerCase() ===
+          String(currentUsername).toLowerCase()
       ) {
         return;
       }
 
-      const saved =
-        localStorage.getItem("chatMessages");
-
-      let oldMessages = [];
-
-      try {
-        oldMessages = saved
-          ? JSON.parse(saved)
-          : [];
-      } catch {
-        oldMessages = [];
-      }
-
-      const messageExists =
-        oldMessages.some(
-          (item) =>
-            item.username === newMessage.username &&
-            item.to === newMessage.to &&
-            item.message === newMessage.message &&
-            item.image === newMessage.image &&
-            item.audio === newMessage.audio &&
-            item.time === newMessage.time
-        );
-
-      if (!messageExists) {
-        localStorage.setItem(
-          "chatMessages",
-          JSON.stringify([
-            ...oldMessages,
-            newMessage,
-          ])
-        );
-      }
+      /*
+       * IMPORTANT:
+       * App.js notification system should NOT save private
+       * messages into chatMessages.
+       *
+       * Chat.js is responsible for storing/rendering messages.
+       * Saving the same message here can mix old/stale avatar
+       * information with the current chat message.
+       */
 
       const activeChat =
         localStorage.getItem("activeChatUser");
 
       if (
-        activeChat === newMessage.username
+        String(activeChat || "").toLowerCase() ===
+        String(newMessage.username || "").toLowerCase()
       ) {
         return;
       }
@@ -208,7 +188,6 @@ function App() {
 
   return (
     <BrowserRouter>
-
       <Navbar />
 
       {notification && (
@@ -248,7 +227,6 @@ function App() {
       )}
 
       <Routes>
-
         <Route
           path="/"
           element={<Home />}
@@ -288,14 +266,9 @@ function App() {
           path="/my-promotions"
           element={<MyPromotions />}
         />
-
       </Routes>
-
     </BrowserRouter>
   );
 }
 
 export default App;
-
-
-
