@@ -7,6 +7,7 @@ function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
@@ -27,7 +28,7 @@ function Login() {
       if (!data || !data.success) {
         alert(
           data?.message ||
-          "Email ya password ghalat hai."
+            "Email ya password ghalat hai."
         );
         return;
       }
@@ -111,14 +112,50 @@ function Login() {
       <br />
       <br />
 
-      <input
-        type="password"
-        placeholder="Enter Password"
-        value={password}
-        onChange={(e) =>
-          setPassword(e.target.value)
-        }
-      />
+      <div
+        style={{
+          position: "relative",
+          display: "inline-block"
+        }}
+      >
+        <input
+          type={showPassword ? "text" : "password"}
+          placeholder="Enter Password"
+          value={password}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
+          style={{
+            paddingRight: "40px"
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={() =>
+            setShowPassword((oldValue) => !oldValue)
+          }
+          aria-label={
+            showPassword
+              ? "Hide password"
+              : "Show password"
+          }
+          style={{
+            position: "absolute",
+            right: "5px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+            padding: "4px",
+            fontSize: "18px",
+            lineHeight: "1"
+          }}
+        >
+          {showPassword ? "🙈" : "👁️"}
+        </button>
+      </div>
 
       <br />
       <br />
