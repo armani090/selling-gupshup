@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
 import "./Chat.css";
 
@@ -640,6 +640,7 @@ function Chat() {
   }, [
     chatMode,
     selectedUser,
+    username,
     requestChatProfileImage,
   ]);
 
@@ -3236,6 +3237,7 @@ function Chat() {
 }
 
 export default Chat;
+
 
 
 
