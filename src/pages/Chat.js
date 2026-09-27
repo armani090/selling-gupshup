@@ -24,6 +24,15 @@ function Chat() {
 
   /*
     IMPORTANT:
+    Ye ref sirf us waqt username rakhega jab user
+    khud kisi profile ko open karega.
+
+    Background profile-image requests is ref ko set nahi kartin.
+    Is wajah se background request profile viewer ko open nahi karegi.
+  */
+  const profileViewerTargetRef = useRef("");
+
+  /*
     Har doosre user ki profile picture alag store hogi.
     Is se received message mein current logged-in user
     ki picture dobara show nahi hogi.
@@ -86,13 +95,13 @@ function Chat() {
   }, [chatMode]);
 
   const emojis = [
-    "\u{1F600}","\u{1F602}","\u{1F923}","\u{1F60A}","\u{1F60D}","\u{1F970}","\u{1F618}","\u{1F60E}",
-    "\u{1F929}","\u{1F973}","\u{1F622}","\u{1F62D}","\u{1F624}","\u{1F621}",
-    "\u{1F631}","\u{1F628}","\u{1F914}","\u{1F917}","\u{1F634}","\u{1F91F}","\u{1F44E}",
-    "\u{1F44C}","\u{270C}\uFE0F","\u{1F91E}","\u{1F64F}","\u{1F4AA}","\u{1F44B}","\u{2764}\uFE0F","\u{1F49B}",
-    "\u{1F49A}","\u{1F499}","\u{1F49C}","\u{1F5A4}","\u{1F494}","\u{1F495}","\u{1F496}","\u{1F525}",
-    "\u{2728}","\u{1F4AF}","\u{1F389}","\u{1F38A}","\u{1F680}","\u{1F308}","\u{2615}","\u{26BD}",
-    "\u{1F3AE}","\u{1F3B5}","\u{1F3B6}","\u{1F4F1}","\u{1F4BB}","\u{1F4F7}","\u{1F697}"
+    "\u{1F600}", "\u{1F602}", "\u{1F923}", "\u{1F60A}", "\u{1F60D}", "\u{1F970}", "\u{1F618}", "\u{1F60E}",
+    "\u{1F929}", "\u{1F973}", "\u{1F622}", "\u{1F62D}", "\u{1F624}", "\u{1F621}",
+    "\u{1F631}", "\u{1F628}", "\u{1F914}", "\u{1F917}", "\u{1F634}", "\u{1F91F}", "\u{1F44E}",
+    "\u{1F44C}", "\u{270C}\uFE0F", "\u{1F91E}", "\u{1F64F}", "\u{1F4AA}", "\u{1F44B}", "\u{2764}\uFE0F", "\u{1F49B}",
+    "\u{1F49A}", "\u{1F499}", "\u{1F49C}", "\u{1F5A4}", "\u{1F494}", "\u{1F495}", "\u{1F496}", "\u{1F525}",
+    "\u{2728}", "\u{1F4AF}", "\u{1F389}", "\u{1F38A}", "\u{1F680}", "\u{1F308}", "\u{2615}", "\u{26BD}",
+    "\u{1F3AE}", "\u{1F3B5}", "\u{1F3B6}", "\u{1F4F1}", "\u{1F4BB}", "\u{1F4F7}", "\u{1F697}"
   ];
 
   /* ==========================================
@@ -101,6 +110,62 @@ function Chat() {
 
   useEffect(() => {
     const handleUserProfileResult = (data) => {
+      const requestedProfile = String(
+        profileViewerTargetRef.current || ""
+      ).toLowerCase();
+
+      const returnedUsername = String(
+        data?.user?.username || ""
+      ).toLowerCase();
+
+      /*
+        IMPORTANT:
+        Agar ye background profile-image request hai,
+        to profile viewer bilkul open nahi hoga.
+
+        Sirf explicit profile request, jo openUserProfile()
+        se aayi ho, viewer ko open karegi.
+      */
+      if (!requestedProfile) {
+        /*
+          Background request hai.
+          Profile image cache kar dein aur return kar dein.
+        */
+        if (
+          data &&
+          data.success &&
+          data.user &&
+          data.user.username &&
+          data.user.profileImage
+        ) {
+          setChatProfileImages((oldImages) => ({
+            ...oldImages,
+            [data.user.username]: data.user.profileImage
+          }));
+        }
+
+        return;
+      }
+
+      /*
+        Explicit profile request hai.
+
+        Successful response mein username match hona zaroori hai.
+        Is se Raja ya kisi doosre user ka response galti se
+        khola nahi jayega.
+      */
+      if (
+        data &&
+        data.success &&
+        returnedUsername !== requestedProfile
+      ) {
+        return;
+      }
+
+      /*
+        Explicit request complete ho gayi.
+      */
+      profileViewerTargetRef.current = "";
       setProfileLoading(false);
 
       if (!data || !data.success) {
@@ -114,7 +179,6 @@ function Chat() {
       const userData = data.user || null;
 
       /*
-        IMPORTANT:
         Jab kisi user ka profile server se milta hai,
         uski profile image chat ke liye cache kar dein.
       */
@@ -150,6 +214,10 @@ function Chat() {
   /*
     Kisi bhi message ke sender ki profile picture
     server se mangwa kar cache karne ka helper.
+
+    IMPORTANT:
+    Ye function profileViewerTargetRef ko set nahi karta.
+    Is liye iska response profile viewer open nahi karega.
   */
   const requestChatProfileImage = useCallback((targetUsername) => {
     if (!targetUsername) return;
@@ -220,6 +288,9 @@ function Chat() {
     chatProfileImages
   ]);
 
+  /*
+    USER PROFILE KO SIRF USER KE CLICK PAR OPEN KARNA HAI.
+  */
   const openUserProfile = (targetUsername) => {
     if (!targetUsername) {
       return;
@@ -231,6 +302,14 @@ function Chat() {
     ) {
       return;
     }
+
+    /*
+      IMPORTANT:
+      Explicitly requested profile ka naam ref mein rakhein.
+      Background requests is ref ko touch nahi kartin.
+    */
+    profileViewerTargetRef.current =
+      String(targetUsername);
 
     setProfileLoading(true);
     setProfileError("");
@@ -246,6 +325,12 @@ function Chat() {
   };
 
   const closeUserProfile = () => {
+    /*
+      Agar user profile viewer close kar de to pending
+      profile response viewer ko dobara open na kare.
+    */
+    profileViewerTargetRef.current = "";
+
     setShowProfileViewer(false);
     setViewedProfile(null);
     setProfileError("");
@@ -641,7 +726,7 @@ function Chat() {
     chatMode,
     selectedUser,
     username,
-    requestChatProfileImage,
+    requestChatProfileImage
   ]);
 
   /* ==========================================
@@ -685,7 +770,6 @@ function Chat() {
       }
 
       /*
-        IMPORTANT:
         Received message ke sender ki profile
         picture server se mangwa rahe hain.
       */
@@ -770,10 +854,6 @@ function Chat() {
                 newMessage.username,
               {
                 body: notificationBody,
-                /*
-                  Notification mein bhi sender ki image
-                  use karne ki koshish.
-                */
                 icon:
                   newMessage.profileImage ||
                   newMessage.senderProfileImage ||
@@ -848,6 +928,7 @@ function Chat() {
     profileImage,
     requestChatProfileImage
   ]);
+
   /* ==========================================
      RECEIVE PUBLIC MESSAGE
   ========================================== */
@@ -928,6 +1009,7 @@ function Chat() {
       );
     };
   }, [username, requestChatProfileImage]);
+
   /* ==========================================
      SAVE HISTORY
   ========================================== */
@@ -1031,10 +1113,6 @@ function Chat() {
       message: cleanMessage,
       image: "",
       audio: "",
-      /*
-        Sender ki current profile picture message
-        ke andar bhi save hogi.
-      */
       profileImage: profileImage || "",
       time:
         new Date().toLocaleTimeString()
@@ -1162,12 +1240,14 @@ function Chat() {
   /* ==========================================
      EMOJI
   ========================================== */
+
   const addEmoji = (emoji) => {
     setMessage(
       (oldMessage) =>
         oldMessage + emoji
     );
   };
+
   /* ==========================================
      VOICE
   ========================================== */
@@ -1980,13 +2060,6 @@ function Chat() {
                     item.username ===
                     username;
 
-                  /*
-                    IMPORTANT:
-                    Apne message ke liye hamesha
-                    logged-in user ki picture.
-                    Received message ke liye
-                    sender ki cached/profile picture.
-                  */
                   const messageAvatar =
                     isMine
                       ? (
@@ -2122,10 +2195,6 @@ function Chat() {
                   item.username ===
                   username;
 
-                /*
-                  Public chat mein bhi sender ki
-                  actual profile picture.
-                */
                 const messageAvatar =
                   isMine
                     ? (
@@ -3237,18 +3306,3 @@ function Chat() {
 }
 
 export default Chat;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
