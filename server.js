@@ -1701,6 +1701,10 @@ if (
             audio:
               newMessage.audio ||
               "",
+            profileImage:
+              senderUser?.profileImage ||
+              newMessage.profileImage ||
+              "" ,
 
             time:
               newMessage.time ||
