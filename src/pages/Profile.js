@@ -8,8 +8,6 @@ const API_BASE =
     : window.location.origin;
 
 function Profile() {
-
-
   const savedUser = JSON.parse(
     localStorage.getItem("user") || "{}"
   );
@@ -46,29 +44,46 @@ function Profile() {
 
   const sendProfileUpdate = (videoUrl = videoStatus) => {
     const profileData = {
-      username: username,
-      bio: bio,
+      username,
+      bio,
       profileImage: image,
       videoStatus: videoUrl
     };
 
     if (socket.connected) {
-      console.log("SENDING PROFILE UPDATE:", profileData);
-      socket.emit("update_user_profile", profileData);
+      console.log(
+        "SENDING PROFILE UPDATE:",
+        profileData
+      );
+      socket.emit(
+        "update_user_profile",
+        profileData
+      );
       return;
     }
 
-    console.log("SOCKET NOT CONNECTED - WAITING FOR CONNECTION");
+    console.log(
+      "SOCKET NOT CONNECTED - WAITING FOR CONNECTION"
+    );
 
     const handleConnect = () => {
-      console.log("SOCKET CONNECTED - SENDING PROFILE UPDATE:", profileData);
-      socket.emit("update_user_profile", profileData);
+      console.log(
+        "SOCKET CONNECTED - SENDING PROFILE UPDATE:",
+        profileData
+      );
+
+      socket.emit(
+        "update_user_profile",
+        profileData
+      );
+
       socket.off("connect", handleConnect);
     };
 
     socket.once("connect", handleConnect);
     socket.connect();
   };
+
   const saveProfile = () => {
     localStorage.setItem("username", username);
     localStorage.setItem("email", email);
@@ -76,7 +91,10 @@ function Profile() {
     localStorage.setItem("profileImage", image);
 
     if (videoStatus) {
-      localStorage.setItem("videoStatus", videoStatus);
+      localStorage.setItem(
+        "videoStatus",
+        videoStatus
+      );
     } else {
       localStorage.removeItem("videoStatus");
     }
@@ -89,17 +107,20 @@ function Profile() {
       "user",
       JSON.stringify({
         ...currentUser,
-        username: username,
-        email: email,
-        bio: bio,
+        username,
+        email,
+        bio,
         profileImage: image,
-        videoStatus: videoStatus
+        videoStatus
       })
     );
 
     sendProfileUpdate(videoStatus);
 
-    alert("Profile Updated Successfully ðŸ‘");
+    alert(
+      "Profile Updated Successfully " +
+        "\u{1F44D}"
+    );
   };
 
   const uploadImage = (e) => {
@@ -124,7 +145,9 @@ function Profile() {
     }
 
     if (!file.type.startsWith("video/")) {
-      alert("Please sirf video file select karein.");
+      alert(
+        "Please sirf video file select karein."
+      );
       return;
     }
 
@@ -153,17 +176,22 @@ function Profile() {
 
       if (!response.ok || !data.success) {
         throw new Error(
-          data.message || "Video upload nahi hui."
+          data.message ||
+            "Video upload nahi hui."
         );
       }
 
-      const videoUrl = data.videoUrl.startsWith("http")
-        ? data.videoUrl
-        : `${API_BASE}${data.videoUrl}`;
+      const videoUrl =
+        data.videoUrl.startsWith("http")
+          ? data.videoUrl
+          : `${API_BASE}${data.videoUrl}`;
 
       setVideoStatus(videoUrl);
 
-      localStorage.setItem("videoStatus", videoUrl);
+      localStorage.setItem(
+        "videoStatus",
+        videoUrl
+      );
 
       const currentUser = JSON.parse(
         localStorage.getItem("user") || "{}"
@@ -179,17 +207,28 @@ function Profile() {
 
       sendProfileUpdate(videoUrl);
 
-      alert("Video Status upload ho gaya ðŸ‘");
+      alert(
+        "Video Status upload ho gaya " +
+          "\u{1F44D}"
+      );
     } catch (error) {
-      console.error("Video upload error:", error);
-      alert("Video upload nahi hui. Server check karein.");
+      console.error(
+        "Video upload error:",
+        error
+      );
+
+      alert(
+        "Video upload nahi hui. Server check karein."
+      );
     }
   };
 
   const removeVideoStatus = () => {
     setVideoStatus("");
 
-    localStorage.removeItem("videoStatus");
+    localStorage.removeItem(
+      "videoStatus"
+    );
 
     const currentUser = JSON.parse(
       localStorage.getItem("user") || "{}"
@@ -224,7 +263,8 @@ function Profile() {
           margin: "0 auto",
           background: "#ffffff",
           borderRadius: "22px",
-          boxShadow: "0 10px 35px rgba(0,0,0,0.12)",
+          boxShadow:
+            "0 10px 35px rgba(0,0,0,0.12)",
           overflow: "hidden"
         }}
       >
@@ -259,7 +299,8 @@ function Profile() {
                   height: "130px",
                   borderRadius: "50%",
                   objectFit: "cover",
-                  border: "6px solid #ffffff",
+                  border:
+                    "6px solid #ffffff",
                   boxShadow:
                     "0 5px 18px rgba(0,0,0,0.18)"
                 }}
@@ -270,7 +311,8 @@ function Profile() {
                   width: "130px",
                   height: "130px",
                   borderRadius: "50%",
-                  border: "6px solid #ffffff",
+                  border:
+                    "6px solid #ffffff",
                   background: "#f0f2f5",
                   display: "inline-flex",
                   alignItems: "center",
@@ -280,7 +322,7 @@ function Profile() {
                     "0 5px 18px rgba(0,0,0,0.18)"
                 }}
               >
-                {"ðŸ‘¤"}
+                {"\u{1F464}"}
               </div>
             )}
           </div>
@@ -326,7 +368,7 @@ function Profile() {
                   marginBottom: "10px"
                 }}
               >
-                {"ðŸŽ¥ Video Status"}
+                {"\u{1F3A5} Video Status"}
               </div>
 
               <video
@@ -357,7 +399,7 @@ function Profile() {
                   cursor: "pointer"
                 }}
               >
-                {"ðŸ—‘ï¸ Remove Video Status"}
+                {"\u{1F5D1}\uFE0F Remove Video Status"}
               </button>
             </div>
           )}
@@ -388,7 +430,7 @@ function Profile() {
                 fontWeight: "500"
               }}
             >
-              {"ðŸ“§"} {email}
+              {"\u{1F4E7}"} {email}
             </div>
           </div>
 
@@ -406,7 +448,7 @@ function Profile() {
                 color: "#333"
               }}
             >
-              {"âœï¸ Edit Profile"}
+              {"\u270F\uFE0F Edit Profile"}
             </h3>
 
             <label
@@ -440,7 +482,7 @@ function Profile() {
                 color: "#555"
               }}
             >
-              {"ðŸŽ¥ Video Status"}
+              {"\u{1F3A5} Video Status"}
             </label>
 
             <input
