@@ -1,4 +1,4 @@
-require("dotenv").config();
+﻿require("dotenv").config();
 
 const { createServer } = require("http");
 const { Server } = require("socket.io");
@@ -1592,7 +1592,7 @@ bio:
     }
   );
 
-  // ========================================
+    // ========================================
   // PRIVATE MESSAGE
   // ========================================
 
@@ -1607,7 +1607,8 @@ bio:
       const senderUser = await getUserByUsername(
         newMessage?.username
       );
-if (
+
+      if (
         senderUser?.suspended ||
         senderUser?.blocked
       ) {
@@ -1653,7 +1654,6 @@ if (
         return;
       }
 
-
       if (
         !newMessage ||
         !newMessage.username ||
@@ -1679,6 +1679,9 @@ if (
           )
       );
 
+      const senderProfileImage =
+        senderUser?.profileImage || "";
+
       try {
 
         if (messagesCollection) {
@@ -1701,10 +1704,9 @@ if (
             audio:
               newMessage.audio ||
               "",
+
             profileImage:
-              senderUser?.profileImage ||
-              newMessage.profileImage ||
-              "" ,
+              senderProfileImage,
 
             time:
               newMessage.time ||
@@ -1728,9 +1730,7 @@ if (
       }
 
       newMessage.profileImage =
-        senderUser?.profileImage ||
-        newMessage.profileImage ||
-        "";
+        senderProfileImage;
 
       const receiverSocketId =
         onlineUsers[
@@ -4369,6 +4369,7 @@ async function startServer() {
 }
 
 startServer();
+
 
 
 
