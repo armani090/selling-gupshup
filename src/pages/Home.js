@@ -447,9 +447,7 @@ function Home() {
         );
 
         const response = await fetch(
-          (window.location.hostname === "localhost"
-            ? "http://localhost:5000/upload-post-media"
-            : "/upload-post-media"),
+          "/upload-post-media",
           {
             method: "POST",
             body: formData,
@@ -466,7 +464,6 @@ function Home() {
         }
 
         mediaUrl =
-          "http://localhost:5000" +
           result.mediaUrl;
 
         mediaType =

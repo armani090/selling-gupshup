@@ -29,9 +29,22 @@ function normalizeRole(role) {
 const app = express();
 const httpServer = createServer(app);
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "https://fulfilling-enjoyment-production-0d44.up.railway.app"
+];
+
 app.use(cors({
-  origin: "http://localhost:3000",
-  methods: ["GET", "POST", "OPTIONS"]
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  credentials: true
 }));
 
 const uploadsDir = path.join(__dirname, "uploads");
