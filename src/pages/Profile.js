@@ -1,9 +1,15 @@
-
 import { useState } from "react";
 import { io } from "socket.io-client";
 
+const API_BASE =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : window.location.origin;
+
 function Profile() {
-  const socket = io("http://localhost:5000");
+  const socket = io(API_BASE);
+
   const savedUser = JSON.parse(
     localStorage.getItem("user") || "{}"
   );
@@ -21,16 +27,21 @@ function Profile() {
   );
 
   const [bio, setBio] = useState(
-    localStorage.getItem("bio") ||
+    savedUser.bio ||
+      localStorage.getItem("bio") ||
       "Welcome to Selling GupShup"
   );
 
   const [image, setImage] = useState(
-    localStorage.getItem("profileImage") || ""
+    savedUser.profileImage ||
+      localStorage.getItem("profileImage") ||
+      ""
   );
 
   const [videoStatus, setVideoStatus] = useState(
-    localStorage.getItem("videoStatus") || ""
+    savedUser.videoStatus ||
+      localStorage.getItem("videoStatus") ||
+      ""
   );
 
   const saveProfile = () => {
@@ -38,7 +49,12 @@ function Profile() {
     localStorage.setItem("email", email);
     localStorage.setItem("bio", bio);
     localStorage.setItem("profileImage", image);
-    localStorage.removeItem("videoStatus");
+
+    if (videoStatus) {
+      localStorage.setItem("videoStatus", videoStatus);
+    } else {
+      localStorage.removeItem("videoStatus");
+    }
 
     const currentUser = JSON.parse(
       localStorage.getItem("user") || "{}"
@@ -65,6 +81,7 @@ function Profile() {
 
     alert("Profile Updated Successfully 👍");
   };
+
   const uploadImage = (e) => {
     const file = e.target.files[0];
 
@@ -105,7 +122,7 @@ function Profile() {
       formData.append("video", file);
 
       const response = await fetch(
-        "http://localhost:5000/upload-video-status",
+        `${API_BASE}/upload-video-status`,
         {
           method: "POST",
           body: formData
@@ -120,11 +137,32 @@ function Profile() {
         );
       }
 
-      const videoUrl =
-        "http://localhost:5000" + data.videoUrl;
+      const videoUrl = data.videoUrl.startsWith("http")
+        ? data.videoUrl
+        : `${API_BASE}${data.videoUrl}`;
 
       setVideoStatus(videoUrl);
 
+      localStorage.setItem("videoStatus", videoUrl);
+
+      const currentUser = JSON.parse(
+        localStorage.getItem("user") || "{}"
+      );
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...currentUser,
+          videoStatus: videoUrl
+        })
+      );
+
+      socket.emit("update_user_profile", {
+        username: username,
+        bio: bio,
+        profileImage: image,
+        videoStatus: videoUrl
+      });
 
       alert("Video Status upload ho gaya 👍");
     } catch (error) {
@@ -132,9 +170,30 @@ function Profile() {
       alert("Video upload nahi hui. Server check karein.");
     }
   };
+
   const removeVideoStatus = () => {
     setVideoStatus("");
+
     localStorage.removeItem("videoStatus");
+
+    const currentUser = JSON.parse(
+      localStorage.getItem("user") || "{}"
+    );
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        ...currentUser,
+        videoStatus: ""
+      })
+    );
+
+    socket.emit("update_user_profile", {
+      username: username,
+      bio: bio,
+      profileImage: image,
+      videoStatus: ""
+    });
 
     alert("Video Status removed.");
   };
@@ -211,7 +270,7 @@ function Profile() {
                     "0 5px 18px rgba(0,0,0,0.18)"
                 }}
               >
-                👤
+                {"👤"}
               </div>
             )}
           </div>
@@ -257,7 +316,7 @@ function Profile() {
                   marginBottom: "10px"
                 }}
               >
-                🎥 Video Status
+                {"🎥 Video Status"}
               </div>
 
               <video
@@ -288,7 +347,7 @@ function Profile() {
                   cursor: "pointer"
                 }}
               >
-                🗑️ Remove Video Status
+                {"🗑️ Remove Video Status"}
               </button>
             </div>
           )}
@@ -319,7 +378,7 @@ function Profile() {
                 fontWeight: "500"
               }}
             >
-              📧 {email}
+              {"📧"} {email}
             </div>
           </div>
 
@@ -337,7 +396,7 @@ function Profile() {
                 color: "#333"
               }}
             >
-              ✏️ Edit Profile
+              {"✏️ Edit Profile"}
             </h3>
 
             <label
@@ -371,7 +430,7 @@ function Profile() {
                 color: "#555"
               }}
             >
-              🎥 Video Status
+              {"🎥 Video Status"}
             </label>
 
             <input

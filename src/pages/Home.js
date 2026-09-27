@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { socket } from "../socket";
 
@@ -590,12 +590,29 @@ function Home() {
                     src={postMediaPreview}
                     alt="Post preview"
                     className="post-preview-image"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "150px",
+                      width: "auto",
+                      height: "auto",
+                      objectFit: "contain",
+                      display: "block",
+                      margin: "0 auto",
+                    }}
                   />
                 ) : (
                   <video
                     src={postMediaPreview}
                     controls
                     className="post-preview-video"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "150px",
+                      width: "auto",
+                      height: "auto",
+                      display: "block",
+                      margin: "0 auto",
+                    }}
                   />
                 )}
 
@@ -1228,4 +1245,10 @@ function Home() {
 }
 
 export default Home;
+
+
+
+
+
+
 

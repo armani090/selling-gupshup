@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
 import "./Chat.css";
 
@@ -1471,7 +1471,7 @@ function Chat() {
                     });
                   }}
                 >
-                  <span className="online-user-dot">●</span>
+                  <span className="online-user-dot">â—</span>
                   <span className="online-user-name">{user}</span>
 
                   {unreadPrivateMessages[user] > 0 && (
@@ -2794,7 +2794,7 @@ function Chat() {
                   cursor: "pointer"
                 }}
               >
-                "?"
+                "🔙"
               </button>
             </div>
 
@@ -2959,6 +2959,7 @@ function Chat() {
 }
 
 export default Chat;
+
 
 
 
