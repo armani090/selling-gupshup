@@ -1723,6 +1723,11 @@ if (
         );
       }
 
+      newMessage.profileImage =
+        senderUser?.profileImage ||
+        newMessage.profileImage ||
+        "";
+
       const receiverSocketId =
         onlineUsers[
           newMessage.to
@@ -1794,10 +1799,33 @@ if (
               createdAt: 1
             })
             .toArray();
+        const usernames = [...new Set(history.map((item) => item?.username).filter(Boolean))];
+
+        const users = await usersCollection.find(
+          { username: { $in: usernames } },
+          { projection: { username: 1, profileImage: 1 } }
+        ).toArray();
+
+        const profileMap = {};
+
+        users.forEach((user) => {
+          if (user?.username) {
+            profileMap[user.username.toLowerCase()] =
+              user.profileImage || "";
+          }
+        });
+
+        const historyWithProfiles = history.map((item) => ({
+          ...item,
+          profileImage:
+            item.profileImage ||
+            profileMap[String(item.username || "").toLowerCase()] ||
+            ""
+        }));
 
         socket.emit(
           "private_messages_history",
-          history
+          historyWithProfiles
         );
 
       } catch (error) {
@@ -4337,6 +4365,9 @@ async function startServer() {
 }
 
 startServer();
+
+
+
 
 
 
