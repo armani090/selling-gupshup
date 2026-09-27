@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { io } from "socket.io-client";
+import { socket } from "../socket";
 
 const API_BASE =
   window.location.hostname === "localhost" ||
@@ -8,7 +8,7 @@ const API_BASE =
     : window.location.origin;
 
 function Profile() {
-  const socket = io(API_BASE);
+
 
   const savedUser = JSON.parse(
     localStorage.getItem("user") || "{}"
@@ -79,7 +79,7 @@ function Profile() {
       videoStatus: videoStatus
     });
 
-    alert("Profile Updated Successfully 👍");
+    alert("Profile Updated Successfully ðŸ‘");
   };
 
   const uploadImage = (e) => {
@@ -164,7 +164,7 @@ function Profile() {
         videoStatus: videoUrl
       });
 
-      alert("Video Status upload ho gaya 👍");
+      alert("Video Status upload ho gaya ðŸ‘");
     } catch (error) {
       console.error("Video upload error:", error);
       alert("Video upload nahi hui. Server check karein.");
@@ -270,7 +270,7 @@ function Profile() {
                     "0 5px 18px rgba(0,0,0,0.18)"
                 }}
               >
-                {"👤"}
+                {"ðŸ‘¤"}
               </div>
             )}
           </div>
@@ -316,7 +316,7 @@ function Profile() {
                   marginBottom: "10px"
                 }}
               >
-                {"🎥 Video Status"}
+                {"ðŸŽ¥ Video Status"}
               </div>
 
               <video
@@ -347,7 +347,7 @@ function Profile() {
                   cursor: "pointer"
                 }}
               >
-                {"🗑️ Remove Video Status"}
+                {"ðŸ—‘ï¸ Remove Video Status"}
               </button>
             </div>
           )}
@@ -378,7 +378,7 @@ function Profile() {
                 fontWeight: "500"
               }}
             >
-              {"📧"} {email}
+              {"ðŸ“§"} {email}
             </div>
           </div>
 
@@ -396,7 +396,7 @@ function Profile() {
                 color: "#333"
               }}
             >
-              {"✏️ Edit Profile"}
+              {"âœï¸ Edit Profile"}
             </h3>
 
             <label
@@ -430,7 +430,7 @@ function Profile() {
                 color: "#555"
               }}
             >
-              {"🎥 Video Status"}
+              {"ðŸŽ¥ Video Status"}
             </label>
 
             <input
