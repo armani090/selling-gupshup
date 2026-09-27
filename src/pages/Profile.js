@@ -44,6 +44,31 @@ function Profile() {
       ""
   );
 
+  const sendProfileUpdate = (videoUrl = videoStatus) => {
+    const profileData = {
+      username: username,
+      bio: bio,
+      profileImage: image,
+      videoStatus: videoUrl
+    };
+
+    if (socket.connected) {
+      console.log("SENDING PROFILE UPDATE:", profileData);
+      socket.emit("update_user_profile", profileData);
+      return;
+    }
+
+    console.log("SOCKET NOT CONNECTED - WAITING FOR CONNECTION");
+
+    const handleConnect = () => {
+      console.log("SOCKET CONNECTED - SENDING PROFILE UPDATE:", profileData);
+      socket.emit("update_user_profile", profileData);
+      socket.off("connect", handleConnect);
+    };
+
+    socket.once("connect", handleConnect);
+    socket.connect();
+  };
   const saveProfile = () => {
     localStorage.setItem("username", username);
     localStorage.setItem("email", email);
@@ -72,12 +97,7 @@ function Profile() {
       })
     );
 
-    socket.emit("update_user_profile", {
-      username: username,
-      bio: bio,
-      profileImage: image,
-      videoStatus: videoStatus
-    });
+    sendProfileUpdate(videoStatus);
 
     alert("Profile Updated Successfully ðŸ‘");
   };
@@ -157,12 +177,7 @@ function Profile() {
         })
       );
 
-      socket.emit("update_user_profile", {
-        username: username,
-        bio: bio,
-        profileImage: image,
-        videoStatus: videoUrl
-      });
+      sendProfileUpdate(videoUrl);
 
       alert("Video Status upload ho gaya ðŸ‘");
     } catch (error) {
@@ -188,12 +203,7 @@ function Profile() {
       })
     );
 
-    socket.emit("update_user_profile", {
-      username: username,
-      bio: bio,
-      profileImage: image,
-      videoStatus: ""
-    });
+    sendProfileUpdate("");
 
     alert("Video Status removed.");
   };
