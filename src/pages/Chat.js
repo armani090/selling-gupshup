@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useCallback, useEffect, useRef, useState } from "react";
 import { socket } from "../socket";
 import "./Chat.css";
 
@@ -151,7 +151,7 @@ function Chat() {
     Kisi bhi message ke sender ki profile picture
     server se mangwa kar cache karne ka helper.
   */
-  const requestChatProfileImage = (targetUsername) => {
+  const requestChatProfileImage = useCallback((targetUsername) => {
     if (!targetUsername) return;
 
     if (
@@ -174,7 +174,7 @@ function Chat() {
         username: targetUsername
       }
     );
-  };
+  }, [username, chatProfileImages]);
 
   /*
     Existing private/public messages mein jitne
@@ -213,6 +213,7 @@ function Chat() {
       }
     });
   }, [
+    requestChatProfileImage,
     messages,
     publicMessages,
     username,
@@ -637,9 +638,9 @@ function Chat() {
       );
     };
   }, [
-    username,
+    chatMode,
     selectedUser,
-    chatMode
+    requestChatProfileImage,
   ]);
 
   /* ==========================================
@@ -843,9 +844,9 @@ function Chat() {
     };
   }, [
     username,
-    profileImage
+    profileImage,
+    requestChatProfileImage
   ]);
-
   /* ==========================================
      RECEIVE PUBLIC MESSAGE
   ========================================== */
@@ -925,8 +926,7 @@ function Chat() {
         handleReceivePublicMessage
       );
     };
-  }, [username]);
-
+  }, [username, requestChatProfileImage]);
   /* ==========================================
      SAVE HISTORY
   ========================================== */
@@ -1161,14 +1161,12 @@ function Chat() {
   /* ==========================================
      EMOJI
   ========================================== */
-
   const addEmoji = (emoji) => {
     setMessage(
       (oldMessage) =>
         oldMessage + emoji
     );
   };
-
   /* ==========================================
      VOICE
   ========================================== */
@@ -3238,3 +3236,16 @@ function Chat() {
 }
 
 export default Chat;
+
+
+
+
+
+
+
+
+
+
+
+
+
