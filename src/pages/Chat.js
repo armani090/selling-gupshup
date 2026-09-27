@@ -22,6 +22,14 @@ function Chat() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState("");
 
+  /*
+    IMPORTANT:
+    Har doosre user ki profile picture alag store hogi.
+    Is se received message mein current logged-in user
+    ki picture dobara show nahi hogi.
+  */
+  const [chatProfileImages, setChatProfileImages] = useState({});
+
   const [selectedUser, setSelectedUser] = useState(() => {
     return localStorage.getItem("activeChatUser") || "";
   });
@@ -103,8 +111,26 @@ function Chat() {
         return;
       }
 
+      const userData = data.user || null;
+
+      /*
+        IMPORTANT:
+        Jab kisi user ka profile server se milta hai,
+        uski profile image chat ke liye cache kar dein.
+      */
+      if (
+        userData &&
+        userData.username &&
+        userData.profileImage
+      ) {
+        setChatProfileImages((oldImages) => ({
+          ...oldImages,
+          [userData.username]: userData.profileImage
+        }));
+      }
+
       setProfileError("");
-      setViewedProfile(data.user || null);
+      setViewedProfile(userData);
       setShowProfileViewer(true);
     };
 
@@ -120,6 +146,78 @@ function Chat() {
       );
     };
   }, []);
+
+  /*
+    Kisi bhi message ke sender ki profile picture
+    server se mangwa kar cache karne ka helper.
+  */
+  const requestChatProfileImage = (targetUsername) => {
+    if (!targetUsername) return;
+
+    if (
+      String(targetUsername).toLowerCase() ===
+      String(username).toLowerCase()
+    ) {
+      return;
+    }
+
+    const alreadyCached =
+      chatProfileImages[targetUsername];
+
+    if (alreadyCached) {
+      return;
+    }
+
+    socket.emit(
+      "get_user_profile",
+      {
+        username: targetUsername
+      }
+    );
+  };
+
+  /*
+    Existing private/public messages mein jitne
+    doosre users hain unki profile images load karna.
+  */
+  useEffect(() => {
+    const usersToLoad = new Set();
+
+    messages.forEach((item) => {
+      if (
+        item &&
+        item.username &&
+        String(item.username).toLowerCase() !==
+          String(username).toLowerCase()
+      ) {
+        usersToLoad.add(item.username);
+      }
+    });
+
+    publicMessages.forEach((item) => {
+      if (
+        item &&
+        item.username &&
+        String(item.username).toLowerCase() !==
+          String(username).toLowerCase()
+      ) {
+        usersToLoad.add(item.username);
+      }
+    });
+
+    usersToLoad.forEach((targetUsername) => {
+      if (
+        !chatProfileImages[targetUsername]
+      ) {
+        requestChatProfileImage(targetUsername);
+      }
+    });
+  }, [
+    messages,
+    publicMessages,
+    username,
+    chatProfileImages
+  ]);
 
   const openUserProfile = (targetUsername) => {
     if (!targetUsername) {
@@ -516,6 +614,12 @@ function Chat() {
       }
     );
 
+    /*
+      Selected user ki profile image bhi request
+      kar dein agar cache mein nahi hai.
+    */
+    requestChatProfileImage(selectedUser);
+
     return () => {
       socket.off(
         "chat_history",
@@ -574,29 +678,74 @@ function Chat() {
 
   useEffect(() => {
     const handleReceiveMessage = (newMessage) => {
-
-    if (
-      newMessage &&
-      newMessage.username !== username &&
-      newMessage.to === username
-    ) {
-      const sender = newMessage.username;
-
-      const isCurrentOpenChat =
-        chatModeUnreadRef.current === "private" &&
-        selectedUserUnreadRef.current &&
-        selectedUserUnreadRef.current.toLowerCase() ===
-          sender.toLowerCase();
-
-      if (!isCurrentOpenChat) {
-        setUnreadPrivateMessages((oldUnread) => ({
-          ...oldUnread,
-          [sender]: (oldUnread[sender] || 0) + 1
-        }));
+      if (!newMessage) {
+        return;
       }
-    }
+
+      /*
+        IMPORTANT:
+        Received message ke sender ki profile
+        picture server se mangwa rahe hain.
+      */
       if (
-        newMessage &&
+        newMessage.username &&
+        String(newMessage.username).toLowerCase() !==
+          String(username).toLowerCase()
+      ) {
+        /*
+          Agar server already profileImage bhej raha
+          ho to pehle usko cache kar dein.
+        */
+        if (newMessage.profileImage) {
+          setChatProfileImages((oldImages) => ({
+            ...oldImages,
+            [newMessage.username]:
+              newMessage.profileImage
+          }));
+        } else if (
+          newMessage.senderProfileImage
+        ) {
+          setChatProfileImages((oldImages) => ({
+            ...oldImages,
+            [newMessage.username]:
+              newMessage.senderProfileImage
+          }));
+        } else if (
+          newMessage.avatar
+        ) {
+          setChatProfileImages((oldImages) => ({
+            ...oldImages,
+            [newMessage.username]:
+              newMessage.avatar
+          }));
+        } else {
+          requestChatProfileImage(
+            newMessage.username
+          );
+        }
+      }
+
+      if (
+        newMessage.username !== username &&
+        newMessage.to === username
+      ) {
+        const sender = newMessage.username;
+
+        const isCurrentOpenChat =
+          chatModeUnreadRef.current === "private" &&
+          selectedUserUnreadRef.current &&
+          selectedUserUnreadRef.current.toLowerCase() ===
+            sender.toLowerCase();
+
+        if (!isCurrentOpenChat) {
+          setUnreadPrivateMessages((oldUnread) => ({
+            ...oldUnread,
+            [sender]: (oldUnread[sender] || 0) + 1
+          }));
+        }
+      }
+
+      if (
         newMessage.username !== username &&
         newMessage.to === username &&
         "Notification" in window &&
@@ -619,7 +768,13 @@ function Chat() {
                 newMessage.username,
               {
                 body: notificationBody,
+                /*
+                  Notification mein bhi sender ki image
+                  use karne ki koshish.
+                */
                 icon:
+                  newMessage.profileImage ||
+                  newMessage.senderProfileImage ||
                   profileImage ||
                   undefined
               }
@@ -698,6 +853,42 @@ function Chat() {
   useEffect(() => {
     const handleReceivePublicMessage =
       (newMessage) => {
+
+        if (
+          newMessage &&
+          newMessage.username &&
+          String(newMessage.username).toLowerCase() !==
+            String(username).toLowerCase()
+        ) {
+          if (newMessage.profileImage) {
+            setChatProfileImages((oldImages) => ({
+              ...oldImages,
+              [newMessage.username]:
+                newMessage.profileImage
+            }));
+          } else if (
+            newMessage.senderProfileImage
+          ) {
+            setChatProfileImages((oldImages) => ({
+              ...oldImages,
+              [newMessage.username]:
+                newMessage.senderProfileImage
+            }));
+          } else if (
+            newMessage.avatar
+          ) {
+            setChatProfileImages((oldImages) => ({
+              ...oldImages,
+              [newMessage.username]:
+                newMessage.avatar
+            }));
+          } else {
+            requestChatProfileImage(
+              newMessage.username
+            );
+          }
+        }
+
         setPublicMessages(
           (oldMessages) => {
             const alreadyExists =
@@ -734,7 +925,7 @@ function Chat() {
         handleReceivePublicMessage
       );
     };
-  }, []);
+  }, [username]);
 
   /* ==========================================
      SAVE HISTORY
@@ -775,6 +966,8 @@ function Chat() {
         "activeChatUser",
         user
       );
+
+      requestChatProfileImage(user);
     } else {
       localStorage.removeItem(
         "activeChatUser"
@@ -837,6 +1030,11 @@ function Chat() {
       message: cleanMessage,
       image: "",
       audio: "",
+      /*
+        Sender ki current profile picture message
+        ke andar bhi save hogi.
+      */
+      profileImage: profileImage || "",
       time:
         new Date().toLocaleTimeString()
     };
@@ -879,6 +1077,7 @@ function Chat() {
     const newMessage = {
       username,
       message: cleanMessage,
+      profileImage: profileImage || "",
       time:
         new Date().toLocaleTimeString()
     };
@@ -937,6 +1136,7 @@ function Chat() {
         message: "",
         image: reader.result,
         audio: "",
+        profileImage: profileImage || "",
         time:
           new Date().toLocaleTimeString()
       };
@@ -1032,6 +1232,7 @@ function Chat() {
             message: "",
             image: "",
             audio: reader.result,
+            profileImage: profileImage || "",
             time:
               new Date().toLocaleTimeString()
           };
@@ -1106,14 +1307,6 @@ function Chat() {
     ) {
       return;
     }
-
-    /*
-      IMPORTANT:
-      Server ko messageId chahiye.
-      MongoDB message ka _id pehle use hoga.
-      Agar _id/id/messageId na ho to fallback
-      unique ID ban jayegi.
-    */
 
     const messageId =
       item._id
@@ -1196,18 +1389,13 @@ function Chat() {
 
     const reportData = {
       messageId: messageId,
-
       reporter: username,
-
       reportedUsername:
         item.username,
-
       message:
         item.message || "",
-
       messageTime:
         item.time || "",
-
       reason:
         finalReason
     };
@@ -1464,6 +1652,8 @@ function Chat() {
                     setShowEmoji(false);
                     localStorage.setItem("activeChatUser", user);
 
+                    requestChatProfileImage(user);
+
                     setUnreadPrivateMessages((oldUnread) => {
                       const next = { ...oldUnread };
                       delete next[user];
@@ -1471,8 +1661,13 @@ function Chat() {
                     });
                   }}
                 >
-                  <span className="online-user-dot">â—</span>
-                  <span className="online-user-name">{user}</span>
+                  <span className="online-user-dot">
+                    {"\u2022"}
+                  </span>
+
+                  <span className="online-user-name">
+                    {user}
+                  </span>
 
                   {unreadPrivateMessages[user] > 0 && (
                     <span className="online-user-unread">
@@ -1488,6 +1683,7 @@ function Chat() {
           )}
         </div>
       </aside>
+
       <div className="chat-container">
 
         <div className="chat-header">
@@ -1559,94 +1755,97 @@ function Chat() {
                   : "normal"
             }}
           >
-              {"\u{1F310} Public Chat"}
+            {"\u{1F310} Public Chat"}
           </button>
 
         </div>
 
         {Object.keys(unreadPrivateMessages).length > 0 && (
-        <div
-          id="unread-private-chat-boxes"
-          style={{
-            display: "flex",
-            gap: "8px",
-            flexWrap: "wrap",
-            padding: "6px 8px",
-            alignItems: "center"
-          }}
-        >
-          {Object.entries(unreadPrivateMessages).map(
-            ([sender, count]) => (
-              <button
-                key={sender}
-                type="button"
-                onClick={() => {
-                  setChatMode("private");
-                  setSelectedUser(sender);
-                  setShowEmoji(false);
+          <div
+            id="unread-private-chat-boxes"
+            style={{
+              display: "flex",
+              gap: "8px",
+              flexWrap: "wrap",
+              padding: "6px 8px",
+              alignItems: "center"
+            }}
+          >
+            {Object.entries(unreadPrivateMessages).map(
+              ([sender, count]) => (
+                <button
+                  key={sender}
+                  type="button"
+                  onClick={() => {
+                    setChatMode("private");
+                    setSelectedUser(sender);
+                    setShowEmoji(false);
 
-                  localStorage.setItem(
-                    "activeChatUser",
-                    sender
-                  );
+                    localStorage.setItem(
+                      "activeChatUser",
+                      sender
+                    );
 
-                  setUnreadPrivateMessages(
-                    (oldUnread) => {
-                      const nextUnread = {
-                        ...oldUnread
-                      };
+                    requestChatProfileImage(sender);
 
-                      delete nextUnread[sender];
+                    setUnreadPrivateMessages(
+                      (oldUnread) => {
+                        const nextUnread = {
+                          ...oldUnread
+                        };
 
-                      return nextUnread;
-                    }
-                  );
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  border: "1px solid #ddd",
-                  borderRadius: "18px",
-                  background: "#fff",
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                  boxShadow:
-                    "0 1px 4px rgba(0,0,0,0.12)"
-                }}
-              >
-                <span>{"\u{1F4AC}"}</span>
+                        delete nextUnread[sender];
 
-                <span
-                  style={{
-                    fontWeight: "bold"
+                        return nextUnread;
+                      }
+                    );
                   }}
-                >
-                  {sender}
-                </span>
-
-                <span
                   style={{
-                    minWidth: "20px",
-                    height: "20px",
-                    borderRadius: "50%",
-                    background: "#1877F2",
-                    color: "#fff",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "12px",
-                    fontWeight: "bold"
+                    gap: "6px",
+                    border: "1px solid #ddd",
+                    borderRadius: "18px",
+                    background: "#fff",
+                    padding: "6px 10px",
+                    cursor: "pointer",
+                    boxShadow:
+                      "0 1px 4px rgba(0,0,0,0.12)"
                   }}
                 >
-                  {count}
-                </span>
-              </button>
-            )
-          )}
-        </div>
-      )}
-      {chatMode === "private" && (
+                  <span>{"\u{1F4AC}"}</span>
+
+                  <span
+                    style={{
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {sender}
+                  </span>
+
+                  <span
+                    style={{
+                      minWidth: "20px",
+                      height: "20px",
+                      borderRadius: "50%",
+                      background: "#1877F2",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "12px",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              )
+            )}
+          </div>
+        )}
+
+        {chatMode === "private" && (
           <div className="user-selection">
 
             <label>
@@ -1782,6 +1981,28 @@ function Chat() {
                     item.username ===
                     username;
 
+                  /*
+                    IMPORTANT:
+                    Apne message ke liye hamesha
+                    logged-in user ki picture.
+                    Received message ke liye
+                    sender ki cached/profile picture.
+                  */
+                  const messageAvatar =
+                    isMine
+                      ? (
+                          item.profileImage ||
+                          profileImage ||
+                          ""
+                        )
+                      : (
+                          item.profileImage ||
+                          item.senderProfileImage ||
+                          item.avatar ||
+                          chatProfileImages[item.username] ||
+                          ""
+                        );
+
                   return (
                     <div
                       key={
@@ -1789,7 +2010,7 @@ function Chat() {
                           ? String(
                               item._id
                             )
-                          : index
+                          : `${item.username}-${item.time}-${index}`
                       }
                       className={
                         isMine
@@ -1798,14 +2019,29 @@ function Chat() {
                       }
                     >
 
-                      <div className="message-avatar" onClick={() => { if (!isMine) { openUserProfile(item.username); } }} style={{ cursor: isMine ? "default" : "pointer" }}>
+                      <div
+                        className="message-avatar"
+                        onClick={() => {
+                          if (!isMine) {
+                            openUserProfile(
+                              item.username
+                            );
+                          }
+                        }}
+                        style={{
+                          cursor: isMine
+                            ? "default"
+                            : "pointer"
+                        }}
+                      >
 
-                        {profileImage ? (
+                        {messageAvatar ? (
                           <img
-                            src={
-                              profileImage
+                            src={messageAvatar}
+                            alt={
+                              item.username +
+                              " Profile"
                             }
-                            alt="Profile"
                           />
                         ) : (
                           "\u{1F464}"
@@ -1816,23 +2052,21 @@ function Chat() {
                       <div className="message-details">
 
                         <strong
-  onClick={() => {
-    if (!isMine) {
-      openUserProfile(
-        item.username
-      );
-    }
-  }}
-  style={{
-    cursor: isMine
-      ? "default"
-      : "pointer"
-  }}
->
-  {
-    item.username
-  }
-</strong>
+                          onClick={() => {
+                            if (!isMine) {
+                              openUserProfile(
+                                item.username
+                              );
+                            }
+                          }}
+                          style={{
+                            cursor: isMine
+                              ? "default"
+                              : "pointer"
+                          }}
+                        >
+                          {item.username}
+                        </strong>
 
                         {item.image && (
                           <div className="message-bubble">
@@ -1889,6 +2123,25 @@ function Chat() {
                   item.username ===
                   username;
 
+                /*
+                  Public chat mein bhi sender ki
+                  actual profile picture.
+                */
+                const messageAvatar =
+                  isMine
+                    ? (
+                        item.profileImage ||
+                        profileImage ||
+                        ""
+                      )
+                    : (
+                        item.profileImage ||
+                        item.senderProfileImage ||
+                        item.avatar ||
+                        chatProfileImages[item.username] ||
+                        ""
+                      );
+
                 return (
                   <div
                     key={
@@ -1896,7 +2149,7 @@ function Chat() {
                         ? String(
                             item._id
                           )
-                        : index
+                        : `${item.username}-${item.time}-${index}`
                     }
                     className={
                       isMine
@@ -1905,17 +2158,32 @@ function Chat() {
                     }
                   >
 
-                    <div className="message-avatar" onClick={() => { if (!isMine) { openUserProfile(item.username); } }} style={{ cursor: isMine ? "default" : "pointer" }}>
+                    <div
+                      className="message-avatar"
+                      onClick={() => {
+                        if (!isMine) {
+                          openUserProfile(
+                            item.username
+                          );
+                        }
+                      }}
+                      style={{
+                        cursor: isMine
+                          ? "default"
+                          : "pointer"
+                      }}
+                    >
 
-                      {profileImage ? (
+                      {messageAvatar ? (
                         <img
-                          src={
-                            profileImage
+                          src={messageAvatar}
+                          alt={
+                            item.username +
+                            " Profile"
                           }
-                          alt="Profile"
                         />
                       ) : (
-                          "\u{1F464}"
+                        "\u{1F464}"
                       )}
 
                     </div>
@@ -1923,23 +2191,23 @@ function Chat() {
                     <div className="message-details">
 
                       <strong
-  onClick={() => {
-    if (!isMine) {
-      openUserProfile(
-        item.username
-      );
-    }
-  }}
-  style={{
-    cursor: isMine
-      ? "default"
-      : "pointer"
-  }}
->
-  {
-    item.username
-  }
-</strong>
+                        onClick={() => {
+                          if (!isMine) {
+                            openUserProfile(
+                              item.username
+                            );
+                          }
+                        }}
+                        style={{
+                          cursor: isMine
+                            ? "default"
+                            : "pointer"
+                        }}
+                      >
+                        {
+                          item.username
+                        }
+                      </strong>
 
                       {item.message && (
                         <div
@@ -2046,7 +2314,11 @@ function Chat() {
             onClick={() =>
               fileInputRef.current.click()
             }
-            disabled={chatMode === "public" || (chatMode === "private" && !selectedUser)}
+            disabled={
+              chatMode === "public" ||
+              (chatMode === "private" &&
+                !selectedUser)
+            }
           >
             {"\u{1F4F7}"}
           </button>
@@ -2062,7 +2334,9 @@ function Chat() {
               !selectedUser
             }
           >
-            {isRecording ? "\u{23F9}\uFE0F" : "\u{1F3A4}"}
+            {isRecording
+              ? "\u{23F9}\uFE0F"
+              : "\u{1F3A4}"}
           </button>
 
           <input
@@ -2092,6 +2366,7 @@ function Chat() {
               !selectedUser
             }
           />
+
           <button
             type="button"
             onClick={sendMessage}
@@ -2136,6 +2411,7 @@ function Chat() {
                   borderLeft: "17px solid white"
                 }}
               />
+
               <span
                 style={{
                   position: "absolute",
@@ -2374,7 +2650,7 @@ function Chat() {
               }}
             >
               <strong>
-                "\u2705 Approved"
+                {"\u2705 Approved"}
               </strong>
 
               <div
@@ -2563,7 +2839,7 @@ function Chat() {
                       "32px"
                   }}
                 >
-                  ?
+                  {"\u23F3"}
                 </div>
 
                 <strong>
@@ -2699,7 +2975,7 @@ function Chat() {
                         )
                       }
                     >
-                      Learn More ?
+                      Learn More
                     </button>
                   )}
 
@@ -2740,8 +3016,11 @@ function Chat() {
 
       </aside>
 
+      {/* ======================================
+          PROFILE VIEWER
+      ====================================== */}
 
-{showProfileViewer && (
+      {showProfileViewer && (
         <div
           style={{
             position: "fixed",
@@ -2794,7 +3073,7 @@ function Chat() {
                   cursor: "pointer"
                 }}
               >
-                "🔙"
+                {"\u{1F519}"}
               </button>
             </div>
 
@@ -2959,31 +3238,3 @@ function Chat() {
 }
 
 export default Chat;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
